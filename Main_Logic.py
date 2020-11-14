@@ -3,7 +3,7 @@ import encoder_decoder as ed
 
 weapon_names = []                                   # Weapons list to be encoded 
 weapon_instances = []                               # Instances of each weapon also used in encoding
-
+threat_coeff = []                                   # List of Threat Coefficients for each target
 # Just for input 
 w_name = ""                     
 w_inst = ""
@@ -18,6 +18,12 @@ while (True):
 
 noftargets= int(input("Enter the number of targets : \n"))      # N of targets [1-> N]
 
+print ("Enter Threat coefficient for each target : ")
+# Get Threat coeff. from input
+for k in range(noftargets):
+    threat_coeff.append(int(input()))
+
+print(threat_coeff)
 # Initializing probability matrix 
 prob_matrix = []
 print ("Enter Success probability matrix : ")
