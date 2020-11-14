@@ -46,6 +46,13 @@ def assigne(List, threat_list):
     return assigne_list
 
 
+def assigne_all(pop):
+    l = []
+    for i in pop:
+        l.append(assigne(i, threat_list))
+    return l
+
+
 def get_key(d,val):
     for key, value in d.items(): 
          if val == value:
@@ -79,12 +86,12 @@ def multiply(weapons_instance, target):
 #this function computes the fitness which is the expected total threat of survival of a specific chrom
 def compute_fitness(chrom, threat_list):
     fitness = 0.0
-    assigned_targets = assigne(chrom, threat_list)
-    #print(assigned_targets)
+    #print(chrom)
     for i in range(len(threat_list)):
-        weapon_list = get_weapons(assigned_targets, i+1)
+        weapon_list = get_weapons(chrom, i+1)
         fitness += multiply(weapon_list, i+1)
     return fitness
+
 
 #here we select to random parents from the list of initialized chroms via roulette wheel
 #it returns a list with the indecees if the selected chroms
@@ -106,19 +113,36 @@ def select(chrom_list):
         #print(num)
         for j in range(len(wheel_range)):
             if num >= 0 and num < wheel_range[0]:
-                if  not selection_list.__contains__(0):
-                    selection_list.append(0)
+                if  not selection_list.__contains__(chrom_list[0]):
+                    selection_list.append(chrom_list[0])
                     i+=1
                 break
             elif num >= sum(wheel_range[:j]) and num < sum(wheel_range[:j+1]):
-                if not selection_list.__contains__(j):
-                    selection_list.append(j)
+                if not selection_list.__contains__(chrom_list[j]):
+                    selection_list.append(chrom_list[j])
                     i+=1
                 break
     return selection_list
+
+
+def replace(NewGen, OldGen, assigned_list):
+    for i in range(len(NewGen)):
+        new_fitness = compute_fitness(NewGen[i], threat_list)
+        old_fitness = compute_fitness(OldGen[i], threat_list)
+        #print(str(new_fitness) + "   " + str(old_fitness))
+        if new_fitness < old_fitness:
+            index = assigned_list.index(OldGen[i])
+            assigned_list[index] = NewGen[i]
+
+            
 
 """threat_list = [16,5,10]
 chrom_list = []
 initialize(chrom_list, 3, 5)
 print(chrom_list)
-print(select(chrom_list))"""
+assigne_all = assigne_all(chrom_list)
+print(assigne_all)
+selected_chroms = select(assigne_all)
+print(selected_chroms)
+replace([[1,11,1,10,10],[1,1,1,0,11]], selected_chroms, assigne_all)
+print(assigne_all)"""
