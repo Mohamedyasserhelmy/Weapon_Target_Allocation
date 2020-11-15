@@ -1,5 +1,6 @@
 import random as r
 import numpy as np
+import initialize_select_v2 as u
 
 # Depending on the value of pc which indicates to make crossover or not
 # and the value of xc which indicates where the crossover occurs
@@ -49,31 +50,54 @@ def crossover(x1, x2):
     
 
 # Mutation function flips each bit in chromosomes
-def mutation(targets):
-    # targets: targets List [1, 2, 3,...N]
+def mutation(chroms, threat_list, enc, weapon_names, prob_matrix):
+    # chroms: targets List [1, 2, 3,...N]
+    fit_chrom1 = u.compute_fitness(chroms[0], threat_list, enc, weapon_names, prob_matrix)
+    fit_chrom2 = u.compute_fitness(chroms[1], threat_list, enc, weapon_names, prob_matrix)
+    if (fit_chrom1 < fit_chrom2):
+        output_chrom = chroms[0]
+        n_genes = len(output_chrom)
 
-    n_targets = len(targets)
+        # Converting Array to string
+        c_array = np.array([str(i) for i in output_chrom])
 
-    # Converting Array to string
-    c_array = np.array([str(i) for i in targets])
-
-    # changed in integration 
-    rm = 0.01
-    
-    # If Rm within range then replace this index with the next index number
-    for j in range(0, n_targets):
-        if (rm <= pm):
-            if (j == n_targets-1):
-                targets[j] = int(c_array[0])
-            else:
-                targets[j] = int(c_array[j+1])
+        # changed in integration 
+        rm = r.uniform(0, 1)
+        
+        # If Rm within range then replace this index with the next index number
+        for j in range(0, n_genes):
+            if (rm <= pm):
+                if (j == n_genes-1):
+                    output_chrom[j] = int(c_array[0])
+                else:
+                    output_chrom[j] = int(c_array[j+1])
                 
-        else:
-            return None
+        chroms[0] = output_chrom
+        
+    elif (fit_chrom2 < fit_chrom1):
+        output_chrom = chroms[1]
+        
+        n_genes = len(output_chrom)
 
-    return targets
+        # Converting Array to string
+        c_array = np.array([str(i) for i in output_chrom])
+
+        # changed in integration 
+        rm = r.uniform(0, 1)
+        
+        # If Rm within range then replace this index with the next index number
+        for j in range(0, n_genes):
+            if (rm <= pm):
+                if (j == n_genes-1):
+                    output_chrom[j] = int(c_array[0])
+                else:
+                    output_chrom[j] = int(c_array[j+1])
+                
+        chroms[1] = output_chrom
+        
+    return chroms
 
 
 
-print(mutation([1,10,11]))
-print(crossover([1,10,11,1,10],[10,11,1,1,1]))
+#print(mutation([1,10,11]))
+#print(crossover([1,10,11,1,10],[10,11,1,1,1]))

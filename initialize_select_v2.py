@@ -2,15 +2,6 @@ import numpy as np
 import encoder_decoder
 
 
-#this is success probability matrix and it's valid only for 3-types of weapons and 3 targets
-probability_matrix = [[0.3, 0.6, 0.5],
-                      [0.4,0.5, 0.4],
-                      [0.1, 0.2, 0.2]]
-
-weapons_type = ['tank','aircraft','grenade']
-
-enc = encoder_decoder.encode(weapons_type,[2,1,2])
-
 #the chrom size is equal to sum of weapons inctances
 def initialize(List, List_size, chrom_size):
     for i in range(List_size):
@@ -46,7 +37,7 @@ def assigne(List, threat_list):
     return assigne_list
 
 
-def assigne_all(pop):
+def assigne_all(pop, threat_list):
     l = []
     for i in pop:
         l.append(assigne(i, threat_list))
@@ -61,7 +52,7 @@ def get_key(d,val):
     return "key doesn't exist"
 
 #this function is to get all of the inctances assigned to a specific single target
-def get_weapons(assigne_list, val):
+def get_weapons(assigne_list, val, enc):
     l = []
     for i in range(len(assigne_list)):
         if np.int(np.binary_repr(val)) == assigne_list[i]:
@@ -70,36 +61,36 @@ def get_weapons(assigne_list, val):
 
 
 #this function computes the threat of a single target using the formula: (1-p)^n*target's threat
-def multiply(weapons_instance, target):
+def multiply(weapons_instance, weapon_names, target, threat_list, probability_matrix):
     #NOTE: if the list of weapons assigned to a pecific target is empty that means this target will effect with 100% of its threat  value
     if len(weapons_instance)==0: return threat_list[target-1]
     result = 1.0
     for item in weapons_instance:
-        for item2 in weapons_type:
+        for item2 in weapon_names:
             if item.__contains__(item2):
-                type_index = weapons_type.index(item2)
+                type_index = weapon_names.index(item2)
                 target_index = target-1
                 result *= 1-probability_matrix[type_index][target_index]
 
     return result*threat_list[target-1]
 
 #this function computes the fitness which is the expected total threat of survival of a specific chrom
-def compute_fitness(chrom, threat_list):
+def compute_fitness(chrom, threat_list, enc, weapon_names, probability_matrix):
     fitness = 0.0
     #print(chrom)
     for i in range(len(threat_list)):
-        weapon_list = get_weapons(chrom, i+1)
-        fitness += multiply(weapon_list, i+1)
+        weapon_list = get_weapons(chrom, i+1, enc)
+        fitness += multiply(weapon_list, weapon_names, i+1, threat_list, probability_matrix)
     return fitness
 
 
 #here we select to random parents from the list of initialized chroms via roulette wheel
 #it returns a list with the indecees if the selected chroms
-def select(chrom_list):
+def select(chrom_list, threat_list, enc, weapon_names, probability_matrix):
     fitness_list= []
     selection_list = []
     for i in chrom_list:
-        fitness = compute_fitness(i, threat_list)
+        fitness = compute_fitness(i, threat_list, enc, weapon_names, probability_matrix)
         fitness_list.append(fitness)
     Sum = sum([(1.0/x) for x in fitness_list])
     #print(fitness_list)
@@ -125,10 +116,10 @@ def select(chrom_list):
     return selection_list
 
 
-def replace(NewGen, OldGen, assigned_list):
+def replace(NewGen, OldGen, assigned_list, threat_list, enc, weapon_names, prob_matrix):
     for i in range(len(NewGen)):
-        new_fitness = compute_fitness(NewGen[i], threat_list)
-        old_fitness = compute_fitness(OldGen[i], threat_list)
+        new_fitness = compute_fitness(NewGen[i], threat_list, enc, weapon_names, prob_matrix)
+        old_fitness = compute_fitness(OldGen[i], threat_list, enc, weapon_names, prob_matrix)
         #print(str(new_fitness) + "   " + str(old_fitness))
         if new_fitness < old_fitness:
             index = assigned_list.index(OldGen[i])
